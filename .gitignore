@@ -1,0 +1,16 @@
+.idea
+.ipynb_checkpoints
+__pycache__
+*.json
+*.log
+
+src/main/python/query_builder/test.py
+rds_config.py
+
+command_install.txt
+
+csv
+
+
+# credential
+credentials.yaml
