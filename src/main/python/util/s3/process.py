@@ -1,4 +1,4 @@
-from util.s3_manager.manage import S3Manager
+from util.s3.manage import S3Manager
 
 
 def main():
@@ -6,7 +6,7 @@ def main():
         standalone process to load and save CSV file data with AWS S3
     """
     manager = S3Manager(
-        bucket_name="",
+        bucket_name="introToDataScience_5",
     )
     df_list = manager.fetch_objects(key="")
     print(df_list)

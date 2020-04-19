@@ -11,7 +11,7 @@ from util.logging import init_logger
 
 
 class S3Manager:
-    def __init__(self, bucket_name):
+    def __init__(self, bucket_name="introToDataScience_5"):
         """
         TODO:
             Add capability to process other formats (i.e. json, text, avro, parquet, etc.)
