@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 def get_source_root():
-    return Path('C://IntroToDataScience_5-master// ')
+    return Path('C:/IntroToDataScience_5-master/')
 
 
 def get_destination(destination):
