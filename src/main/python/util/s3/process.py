@@ -6,10 +6,11 @@ def main():
         standalone process to load and save CSV file data with AWS S3
     """
     manager = S3Manager(
-        bucket_name="introToDataScience_5",
+        bucket_name="introtodatascience5",
+        key="'open_data/emergency_medical_service/origin/csv/응급의료기관현황(2014.5).csv'"
     )
-    df_list = manager.fetch_objects(key="")
-    print(df_list)
+    df = manager.load_csv_to_df()
+    print(df)
 
 
 if __name__ == '__main__':

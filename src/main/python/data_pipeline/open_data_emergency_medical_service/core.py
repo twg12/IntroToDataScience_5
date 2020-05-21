@@ -6,7 +6,7 @@ from util.s3.manage import S3Manager
 
 class OpenDataEmergencyMedicalService:
 
-    def __init__(self, bucket_name: str = "introToDataScience_5", file_name: str = ""):
+    def __init__(self, bucket_name: str = "introtodatascience5", file_name: str = ""):
         self.logger = init_logger()
 
     # TODO: create s3 or rds bucket and fill s3
@@ -20,17 +20,18 @@ class OpenDataEmergencyMedicalService:
         self.save_key = "open_data/emergency_medical_service/process/csv/{filename}.csv".format(
             filename=self.file_name
         )
-        self.input_df = self.load()
+        self.input_df = self.load(bucket_name=self.bucket_name, key=self.load_key)
+        print(self.input_df)
 
-    def load(self):
+    def load(self, bucket_name, key):
         """
             fetch DataFrame and ckeck validate
         :return: pd.DataFrame
         """
-        manager = S3Manager(bucket_name=self.bucket_name)
-        df = manager.fetch_objects(key=self.load_key)
+        manager = S3Manager(bucket_name=bucket_name)
+        df = manager.fetch_objects(key=key)
 
-        return df
+        return df[0]
 
     def filter(self, df: pd.DataFrame ):
         """
