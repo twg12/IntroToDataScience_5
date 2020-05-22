@@ -30,7 +30,6 @@ class Discrimination_Location:
         loc = self.df.transform(lambda x: list(zip(self.df['x_coord'], self.df['y_coord'])))['new'][0:len(self.df['hpid'])]
         loc_list = loc.tolist()
         print(loc_list[0], loc_list[1])
-        #126.97843, 37.56668, 127.02758, 37.49794
         # 서울시청 126.97843, 37.56668
         # 강남역   127.02758, 37.49794
 
