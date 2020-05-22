@@ -1,6 +1,8 @@
+import io
 import tempfile
 from io import StringIO, BytesIO
 
+import botocore
 import boto3
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -11,7 +13,7 @@ from util.logging import init_logger
 
 
 class S3Manager:
-    def __init__(self, bucket_name="introToDataScience_5"):
+    def __init__(self, bucket_name="introtodatascience5", key=""):
         """
         TODO:
             Add capability to process other formats (i.e. json, text, avro, parquet, etc.)
@@ -22,7 +24,16 @@ class S3Manager:
         self.bucket_name = bucket_name
 
         self.s3 = boto3.resource('s3')
+        self.s3_client = boto3.client('s3')
+
         self.s3_bucket = self.s3.Bucket(bucket_name)
+
+        self.object = self.s3_client.get_object(
+            Bucket=bucket_name,
+            Key=key)
+
+    def load_csv_to_df(self):
+        return pd.read_csv(io.BytesIO(self.object['Body'].read()), encoding='euc-kr')
 
     def fetch_objs_list(self, prefix):
         """
@@ -41,6 +52,7 @@ class S3Manager:
         objs_list = self.fetch_objs_list(prefix=key)
         filtered = list(filter(lambda x: x.size > 0, objs_list))
 
+
         def to_df(x):
             """
                 transform obj(x) to df
@@ -50,6 +62,7 @@ class S3Manager:
             ls = StringIO(x.get()['Body'].read().decode('euc-kr'))
             tmp_df = pd.read_csv(ls, header=0)
             return tmp_df
+        to_df()
 
         f_num = len(filtered)
         if f_num > 0:

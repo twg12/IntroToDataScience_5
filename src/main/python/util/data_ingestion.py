@@ -1,6 +1,6 @@
 import urllib.request
 import json
-
+import datetime
 from urllib.parse import urlencode, quote_plus
 from urllib.request import urlopen
 import pandas as pd
@@ -39,28 +39,38 @@ def main():
         TODO: parsing data code (to use)
     """
 
+
     print(soup)
 
-    #
-    # response = urllib.request.urlopen(url)
-    #
-    # json_str = response.read().decode("utf-8")
-    #
-    # json_object = json.loads(json_str)
-    # print(json_object)
+    # Data_injestion about json
+    today = datetime.date.today()
+    start_dt = today - datetime.timedelta(days=100)
+    today = today.strftime('%Y%m%d')
+    start_dt = start_dt.strftime('%Y%m%d')
+
+    args = {
+        'numberOfRows': 10,
+        'pageNo': 1,
+        'ServiceKey': "",
+        'examinDe': today,
+    }
+
+    args_str = ""
+    for k, v in args.items():
+        args_str += '%s=%s' % (k, v)
+
+    res = requests.get(
+        'http://apis.data.go.kr/B552895/openapi/service/OrgPriceExaminService/getExaminPriceList?returnType=json%s' % args_str)
+    data = res.json()
+    items = data['response']['body']['items']
+    df_items = pd.DataFrame(items)
+    df_csv = df_items.to_csv('json.csv', encoding='utf-8-sig')
+    print(items)
+
+    # TODO : save df_csv , divide code as throwing args( json or xml or csv )
 
 
-    #
-    # url = 'http://openapi2.e-gen.or.kr/openapi/service/rest/ErmctInfoInqireService/getEmrrmRltmUsefulSckbdInfoInqire'
-    # queryParams = '?' + urlencode(
-    #     {quote_plus('ServiceKey'): '서비스키', quote_plus('STAGE1'): '서울특별시', quote_plus('STAGE2'): '강남구',
-    #      quote_plus('pageNo'): '1', quote_plus('numOfRows'): '10'})
-    #
-    # request = urllib.request(url + queryParams)
-    # request.get_method = lambda: 'GET'
-    # response_body = urlopen(request).read()
-    # print(response_body)
-    #
+
 
 
 if __name__ == '__main__':
