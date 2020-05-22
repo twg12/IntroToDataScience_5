@@ -3,6 +3,8 @@ import numbers
 import math
 from scipy.spatial import distance
 from haversine import haversine
+import geopandas
+import folium
 
 class Discrimination_Location:
     def __init__(self, x: float = 37, y: float = 128):
@@ -32,11 +34,12 @@ class Discrimination_Location:
         # 서울시청 126.97843, 37.56668
         # 강남역   127.02758, 37.49794
 
-        dist_from_target = list(filter(lambda x: func(x) < 50, loc_list))
+        dist_from_target = list(filter(lambda x: func(x) < 2, loc_list))
 
         print(dist_from_target)
 
-
+    def load_target_xy(self):
+        return pd.read_csv('C:\\Users\\park\\Desktop\\target_xy.csv')
 
 
 
