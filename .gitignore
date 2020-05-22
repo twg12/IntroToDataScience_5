@@ -3,6 +3,7 @@
 __pycache__
 *.json
 *.log
+*.yaml
 
 src/main/python/query_builder/test.py
 rds_config.py
@@ -15,5 +16,3 @@ csv
 # credential
 config/credentials.yaml
 config/logging.yaml
-!/config/credentials.yaml
-!/config/logging.yaml
