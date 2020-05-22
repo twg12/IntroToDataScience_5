@@ -13,6 +13,7 @@ csv
 
 
 # credential
-credentials.yaml
+config/credentials.yaml
+config/logging.yaml
 !/config/credentials.yaml
 !/config/logging.yaml
