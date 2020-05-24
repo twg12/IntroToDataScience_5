@@ -13,7 +13,7 @@ from util.logging import init_logger
 
 
 class S3Manager:
-    def __init__(self, bucket_name="introtodatascience5", key=""):
+    def __init__(self, bucket_name="introtodatascience5", key="open_data/emergency_medical_service/origin/"):
         """
         TODO:
             Add capability to process other formats (i.e. json, text, avro, parquet, etc.)

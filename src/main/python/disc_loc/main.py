@@ -1,8 +1,9 @@
-from disc_loc.core import Discrimination_Location
+from src.main.python.disc_loc.core import Discrimination_Location
 
 
 def main():
-    disc = Discrimination_Location()
+    disc = Discrimination_Location(dist="")
+
     disc.process()
 
 
