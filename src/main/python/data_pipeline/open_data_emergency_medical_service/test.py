@@ -40,9 +40,9 @@ def main():
                         'y_coord': y_coord
                         }, ignore_index=True)
 
-    df[['x_coord', 'y_coord']] = df[['x_coord', 'y_coord']].astype('float64')
+    # df[['x_coord', 'y_coord']] = df[['x_coord', 'y_coord']].astype('float64')
 
-    df.to_csv('C:\\Users\\park\\Desktop\\location.csv', encoding='euc-kr')
+    df.to_csv('C:\\Users\\park\\Desktop\\temp.csv', encoding='euc-kr')
     print(df)
 
 
