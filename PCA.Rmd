@@ -13,7 +13,6 @@ library(skimr)
 library(stringr)
 library(recipes)
 library(tidymodels)
-setwd('C:/Users/CU/Desktop/GoldenTime')
 ```
 
 # 1. EDA
