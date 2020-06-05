@@ -16,3 +16,4 @@ csv
 # credential
 config/credentials.yaml
 config/logging.yaml
+.Rproj.user

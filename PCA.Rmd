@@ -1,0 +1,147 @@
+---
+title: "Constructing Hospital Score Using PCA"
+author: "Seewoo"
+date: '2020 5 30 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(tidyverse)
+library(skimr)
+library(stringr)
+library(recipes)
+library(tidymodels)
+setwd('C:/Users/CU/Desktop/GoldenTime')
+```
+
+# 1. EDA
+
+### reading csv file
+
+```{r read-data, include=FALSE}
+table_1 <- read_csv('응급의료기관 기본정보 조회 서비스_1.csv')
+table_2 <- read_csv('중증질환자 수용가능 정보_2.csv')
+```
+
+### merging plots
+```{r}
+hpdata <- inner_join(table_1, table_2, by='hpid')
+```
+
+### selecting variables
+```{r}
+hpdata <- hpdata %>%
+  select(dutyName.x, starts_with('h'), starts_with('mk'))%>%
+  select(-hv1, -hv12, -hvidate)
+glimpse(hpdata)
+str(hpdata)
+```
+
+### length of unique values in each variable
+```{r}
+nuniq <- c()
+for(i in 1:length(colnames(hpdata))) {
+  nuniq[i] <- hpdata[,i] %>%
+  n_distinct()
+}
+nuniq
+```
+
+### remove columns with zero variance
+```{r}
+hpdata <- hpdata[,nuniq!=1]
+```
+```{r}
+str(hpdata)
+nuniq <- c()
+for(i in 1:length(colnames(hpdata))) {
+  nuniq[i] <- hpdata[,i] %>%
+  n_distinct()
+}
+nuniq
+```
+
+### devide table
+```{r}
+hpdata_f <- hpdata[,nuniq<=3]
+hpdata_n <- hpdata[,nuniq>3]
+```
+
+
+
+### recoding
+```{r}
+hpdata_f <- hpdata_f %>%
+  mutate_all(funs(recode(., 'N1'=0L, '0'=0L, 'N'=0L, '1'=1L, 'Y'=1L, .default=1L)))
+str(hpdata_f)
+```
+
+### merge again
+```{r}
+hpdata <- bind_cols(hpdata_n, hpdata_f)
+glimpse(hpdata)
+```
+
+### centering and scaling
+```{r}
+hpdata_z <- hpdata %>%
+  mutate_each_(funs(scale), vars=colnames(hpdata)[3:32])
+head(hpdata_z[,3:32])
+```
+
+
+# 2. PCA
+
+### Principal Component Analysis
+```{r}
+hp_without_id <- hpdata_z[,3:32] %>%
+    as.matrix()
+hp_pca <- prcomp(hp_without_id)
+hp_pca[[1]]
+hp_pca[[2]][,1:3]
+```
+
+
+### variance explained: \(R^2\)
+First conponent explains 25% of the total variance.
+```{r}
+summary(hp_pca)
+```
+
+
+### scree plot
+```{r}
+screeplot(hp_pca, main = "", col = "blue", type = "lines", pch = 21)
+```
+
+
+### hospital score
+```{r}
+hp_pc1 <- predict(hp_pca)[,1]
+hp_score <- (100-20*hp_pc1)
+hospital_score <- hpdata %>%
+  select(dutyName.x,hpid)%>%
+  mutate(score=hp_score)
+skim(hospital_score)
+```
+
+
+### plotting hospital scores
+```{r}
+library(ggplot2)
+plot_score <- ggplot(hospital_score, aes(x=score))+
+  geom_histogram(fill='sky blue', binwidth = 10)
+plot_score
+```
+
+### exporting dataset
+```{r}
+write.csv(hospital_score, file = 'hospital_score')
+```
+  
+  
+  
+  
+  
