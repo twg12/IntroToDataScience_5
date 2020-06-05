@@ -139,7 +139,12 @@ plot_score
 ```{r}
 write.csv(hospital_score, file = 'hospital_score')
 ```
-  
+
+### To Do 
+* Exploratory Data Analysis
+* Multicolinearity
+* Variable selection
+* Interpretation of each PC(constructing scores other than current hospital score)
   
   
   
