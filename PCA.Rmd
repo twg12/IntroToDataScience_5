@@ -33,9 +33,9 @@ hpdata <- inner_join(table_1, table_2, by='hpid')
 ```{r}
 hpdata <- hpdata %>%
   select(dutyName.x, starts_with('h'), starts_with('mk'))%>%
-  select(-hv1, -hv12, -hvidate)
-glimpse(hpdata)
-str(hpdata)
+  select(-hv1, -hv12, -hvidate, -hvcc, -hvncc, -hvccc, -hvicc, -mkioskty25, -mkioskty9)
+#glimpse(hpdata)
+#str(hpdata)
 ```
 
 ### length of unique values in each variable
@@ -53,7 +53,7 @@ nuniq
 hpdata <- hpdata[,nuniq!=1]
 ```
 ```{r}
-str(hpdata)
+#str(hpdata)
 nuniq <- c()
 for(i in 1:length(colnames(hpdata))) {
   nuniq[i] <- hpdata[,i] %>%
@@ -74,7 +74,7 @@ hpdata_n <- hpdata[,nuniq>3]
 ```{r}
 hpdata_f <- hpdata_f %>%
   mutate_all(funs(recode(., 'N1'=0L, '0'=0L, 'N'=0L, '1'=1L, 'Y'=1L, .default=1L)))
-str(hpdata_f)
+#str(hpdata_f)
 ```
 
 ### merge again
@@ -86,8 +86,8 @@ glimpse(hpdata)
 ### centering and scaling
 ```{r}
 hpdata_z <- hpdata %>%
-  mutate_each_(funs(scale), vars=colnames(hpdata)[3:32])
-head(hpdata_z[,3:32])
+  mutate_each_(funs(scale), vars=colnames(hpdata)[3:length(colnames(hpdata))])
+#head(hpdata_z[,3:32])
 ```
 
 
@@ -95,7 +95,7 @@ head(hpdata_z[,3:32])
 
 ### Principal Component Analysis
 ```{r}
-hp_without_id <- hpdata_z[,3:32] %>%
+hp_without_id <- hpdata_z[,3:length(colnames(hpdata_z))] %>%
     as.matrix()
 hp_pca <- prcomp(hp_without_id)
 hp_pca[[1]]
@@ -146,6 +146,43 @@ write.csv(hospital_score, file = 'hospital_score')
 * Variable selection
 * Interpretation of each PC(constructing scores other than current hospital score)
   
-  
+### second component
+```{r}
+secondComponent <- hp_pca[[2]][,2]
+as.matrix(secondComponent[order(secondComponent)])
+```
+### VIF
+```{r}
+cor(hpdata_z[,-c(1,2)])
+pairs(hpdata_z[,-c(1,2)])
+pairs(hpdata_z[,3:9])
+```
+
+### merging data with hospital_score
+```{r}
+table_1 <- read_csv('응급의료기관 기본정보 조회 서비스_1.csv')
+table_2 <- read_csv('중증질환자 수용가능 정보_2.csv')
+hpdata_transient <- inner_join(table_1, table_2, by='hpid')
+hpdata_full <- left_join(hpdata_transient, hospital_score, by='hpid')
+write.csv(hpdata_full, file = 'hospital_score_fulldata.csv')
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   
   
