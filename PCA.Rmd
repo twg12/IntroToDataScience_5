@@ -151,7 +151,8 @@ write.csv(hospital_score, file = 'hospital_score')
 secondComponent <- hp_pca[[2]][,2]
 as.matrix(secondComponent[order(secondComponent)])
 ```
-### VIF
+
+### Multicolinearity, VIF
 ```{r}
 cor(hpdata_z[,-c(1,2)])
 pairs(hpdata_z[,-c(1,2)])
@@ -167,6 +168,51 @@ hpdata_full <- left_join(hpdata_transient, hospital_score, by='hpid')
 write.csv(hpdata_full, file = 'hospital_score_fulldata.csv')
 ```
 
+# 3. Constructing Valid Scores for hospitals in case of emergency
+
+* Scores should indicate *the overall reliability* of hospitals in case of emergency, not indicating some other criteria such as the *size of the hospital*, and *expertise of doctors*, etc..
+* Therefore, it is of primary interest whether there are emergency rooms available for immediately accomodating emergency patients. And thus, some ways to giving weight to the availability of emergency rooms has to be considered.
+* The first way is to merge the raw data of the availability with overall hospital score, and the second is to merge binary data of the availability with overall hospital score.
+
+### overall hospital score without emergency room
+```{r}
+hpdata_z_without_er <- hpdata_z %>%
+  select(-dutyName.x, -hpid, -hvec) %>%
+    as.matrix()
+hp_pca_overall <- prcomp(hpdata_z_without_er)
+hp_pca_overall[[1]]
+hp_pca_overall[[2]][,1:3]
+hp_pc1_overall <- predict(hp_pca_overall)[,1]
+hp_score_overall <- (100-20*hp_pc1_overall)
+```
+
+### Constructing Score using raw data
+```{r}
+hpdata_raw <- hpdata_z %>%
+  select(dutyName.x, hpid, hvec) %>%
+  mutate(score= scale(hp_score_overall))
+hp_pca_raw <- prcomp(hpdata_raw[,3:4])
+hp_pca_raw[[1]]
+hp_pca_raw[[2]]
+summary(hp_pca_raw)
+hp_pc1_raw <- predict(hp_pca_raw)[,1]
+hp_score_raw <- (100-20*hp_pc1_raw)
+```
+
+### Constructing Score using binary data
+```{r}
+hpdata_binary <- hpdata_raw %>%
+  mutate(hvec = ifelse(
+    hvec >= 1, 1, 0
+  ))
+unique(hpdata_binary$hvec)
+hp_pca_binary <- prcomp(hpdata_binary[,3:4])
+hp_pca_binary[[1]]
+hp_pca_binary[[2]]
+summary(hp_pca_binary)
+hp_pc1_binary <- predict(hp_pca_binary)[,1]
+hp_score_binary <- (100-20*hp_pc1_binary)
+```
 
 
 
