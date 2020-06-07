@@ -119,7 +119,7 @@ screeplot(hp_pca, main = "", col = "blue", type = "lines", pch = 21)
 ### hospital score
 ```{r}
 hp_pc1 <- predict(hp_pca)[,1]
-hp_score <- (100-20*hp_pc1)
+hp_score <- (100-20*scale(hp_pc1))
 hospital_score <- hpdata %>%
   select(dutyName.x,hpid)%>%
   mutate(score=hp_score)
@@ -154,9 +154,9 @@ as.matrix(secondComponent[order(secondComponent)])
 
 ### Multicolinearity, VIF
 ```{r}
-cor(hpdata_z[,-c(1,2)])
-pairs(hpdata_z[,-c(1,2)])
-pairs(hpdata_z[,3:9])
+#cor(hpdata_z[,-c(1,2)])
+#pairs(hpdata_z[,-c(1,2)])
+#pairs(hpdata_z[,3:9])
 ```
 
 ### merging data with hospital_score
@@ -183,7 +183,7 @@ hp_pca_overall <- prcomp(hpdata_z_without_er)
 hp_pca_overall[[1]]
 hp_pca_overall[[2]][,1:3]
 hp_pc1_overall <- predict(hp_pca_overall)[,1]
-hp_score_overall <- (100-20*hp_pc1_overall)
+hp_score_overall <- (100-20*scale(hp_pc1_overall))
 ```
 
 ### Constructing Score using raw data
@@ -196,7 +196,7 @@ hp_pca_raw[[1]]
 hp_pca_raw[[2]]
 summary(hp_pca_raw)
 hp_pc1_raw <- predict(hp_pca_raw)[,1]
-hp_score_raw <- (100-20*hp_pc1_raw)
+hp_score_raw <- (100-20*scale(hp_pc1_raw))
 ```
 
 ### Constructing Score using binary data
@@ -211,14 +211,61 @@ hp_pca_binary[[1]]
 hp_pca_binary[[2]]
 summary(hp_pca_binary)
 hp_pc1_binary <- predict(hp_pca_binary)[,1]
-hp_score_binary <- (100-20*hp_pc1_binary)
+hp_score_binary <- (100-20*scale(hp_pc1_binary))
 ```
 
+### Importing criterion for checking criterion validity
+```{r}
+criterion <- read_csv('hospital_score_fulldata_criterion.csv') %>%
+  select(hpid, criterion)
+hospital_score_raw_bin <- hpdata %>%
+  select(dutyName.x,hpid)%>%
+  mutate(score_overall=hp_score_overall,
+         score_raw=hp_score_raw,
+         score_binary=hp_score_binary) %>%
+  full_join(., criterion, by= 'hpid')
+unique(hospital_score_raw_bin$criterion)
+hospital_score_raw_bin <- hospital_score_raw_bin %>%
+  mutate(criterion=recode(criterion, '1'=1L, '2'=2L, '3'=3L, .default=NA_integer_))
+str(hospital_score_raw_bin)
+```
 
+### Checking criterion validity
+```{r}
+cor(hospital_score_raw_bin[,3:6], use= 'pairwise.complete.obs')
+hospital_score_raw_bin %>% 
+  drop_na(criterion)%>%
+  ggplot(aes(as.factor(criterion),score_overall))+
+  geom_point(position = 'jitter')+
+  labs(x='Criterion')
 
+hospital_score_raw_bin %>% 
+  drop_na(criterion)%>%
+  ggplot(aes(as.factor(criterion),score_raw))+
+  geom_point(position = 'jitter')+
+  labs(x='Criterion')
 
+hospital_score_raw_bin %>% 
+  drop_na(criterion)%>%
+  ggplot(aes(as.factor(criterion),score_binary))+
+  geom_point(position = 'jitter')+
+  labs(x='Criterion')
+```
+```{r}
+a <- inner_join(hospital_score_raw_bin, select(hpdata, hpid, hvec), by='hpid')
+cor(a$criterion, a$hvec, use='complete.obs')
 
-
+a %>% 
+  drop_na(criterion)%>%
+  ggplot(aes(as.factor(criterion),hvec))+
+  geom_point(position = 'jitter')+
+  labs(x='Criterion')
+```
+  
+### Exporting data
+```{r, include=FALSE}
+write.csv(hospital_score_raw_bin, file = 'hospital_score_raw_binary.csv')
+```
 
 
 
