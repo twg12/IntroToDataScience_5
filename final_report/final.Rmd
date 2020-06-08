@@ -1,0 +1,363 @@
+---
+title: "RMarkDownFile"
+author: "[Golden Time](https://github.com/twg12/IntroToDataScience_5)"
+date: '2020 6 8 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo=FALSE, result='hide', message=FALSE}
+mylocation = "C:\\Users\\YoonHoJeong\\Desktop\\Projects\\IntroToDataScience_5\\data\\api_data"
+
+setwd(mylocation)
+
+library(knitr)
+library(readr)
+library(tidyverse)
+library(skimr)
+library(stringr)
+library(recipes)
+library(tidymodels)
+
+library(httr)
+library(XML)
+library(xml2)
+library(writexl)
+library(tictoc)
+```
+
+프로젝트 소개가 들어갈 예정입니다.
+
+To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
+
+# 1. 국내 응급의료 취약지 선정의 현주소
+
+응급의료 취약지 선정에 대한 내용이 들어갈 예정입니다.
+
+
+# 2. 데이터 선정
+응급의료 취약지를 선정하기 위한 요인들을 고려했다.  
+1. 접근성
+  - 응급 상황 시 환자의 이송시간은 환자의 생존여부과 큰 상관 관계를 갖는다. 하지만 우리나라의 인허가된 의료시설을 살펴보면 병원은 3,881개로 이 가운데 3,194개가 도시지역에 집중되어 있다. 
+2. 취약 인구 지수, 인구 밀도
+  - 우리나라 고령인구 비율은 전체 인구 중 13.2%이나, 농어촌지역은 37.8%로 도시지역에 비해 고령화가 빠르게 진행 중에 있다(Statistics, 2015). 고령인구 사망자 가운데 응급처치가 필요한 심장질환에 의한 사망자는 2006년 14,906명에서 2016년 24,259명으로 약 63%가 증가하였으며, 1년에 약 6%씩 증가하고 있는 것으로 조사되었다(Statistics, 2017). 향후 2060년에는 고령인구가 인구 전
+체에 40%를 육박할 것으로 추정되어(Beak et al., 2016), 심장질환에 취약한 고령인구 또한 증가할 것으로 예상되고 있다.
+3. 응급의료시설 점수
+  - 뇌졸중, 심근경색 등 중증 심혈관질환자의 경우, 인근 응급시설로 이송된 이후 해당 응급의료시설에서의 의료 자원 부족으로 적절한 조치를 받지 못하며 타 병원으로 이송되는 경우가 종종 발생한다. 접근성만을 고려했을 때, 이와 같은 요인을 고려되지 못하므로, 각 병원별 응급의료시설의 점수를 취약지 선정에 반영하기로 하였다. 
+
+
+## 2-1. Data source
+접근성과 응급의료시설 점수를 계산하기 위한 데이터 수집은 [공공데이터포털 - 전국 응급의료기관 조회 서비스](https://www.data.go.kr/data/15000563/openapi.do)를 활용했다.
+
+## 2-2. Data Extraction
+데이터는 공공 데이터 센터에서 제공하는 API를 통해서 호출.
+데이터 로딩에 오랜 시간이 걸리기 때문에, xlsx파일로 저장하고,
+만약 해당 데이터가 존재하지 않는다면 API를 호출해서 파일로 저장한다.
+
+### 2-2-1. 응급의료기관 기본 정보 조회 서비스
+```{r echo=FALSE, result='hide', message=FALSE}
+
+
+# 응급의료기관 기본정보 조회 서비스
+url = "http://openapi2.e-gen.or.kr/openapi/service/rest/ErmctInfoInqireService/"
+
+api_call_func1 <- function() {
+  ## 응급실 실시간 가용병상정보 조회 1번 오퍼레이터
+  
+  operator = "getEmrrmRltmUsefulSckbdInfoInqire"
+  Servicekey = "your_service_key"
+  pageNo = "1"
+  numOfRows = "99"
+  
+  result_table_1 = tibble()
+  for (i in 1:10){
+    queryParams = str_c("?serviceKey=", Servicekey, "&pageNo=", as.character(i), "&numOfRows=", "50")
+    doc = xmlInternalTreeParse(str_c(url, operator, queryParams))
+    rootNode = xmlRoot(doc)
+    names = rootNode[[2]][['items']][['item']] %>%
+      names()
+    tmp_tbl = xmlToDataFrame(nodes = getNodeSet(rootNode, '//item')) %>%
+      set_names(iconv(names, "UTF-8", "CP949") %>% unname()) %>%
+      as_tibble()
+    result_table_1 = result_table_1 %>% bind_rows(.,tmp_tbl)}
+  
+  which(result_table_1$dutyName == "의료법인명지의료재단명지병원")
+  result_table_1[c(23, 391),] # 이름은 같지만 지역이 다른 명지병원이므로 인정
+  # 응급의료기관 지정 병원 갯수가 대략 402개 나옵니다
+  
+  write_xlsx(result_table_1, "응급의료기관 기본정보 조회 서비스_1.xlsx")
+  write_excel_csv(result_table_1, "result_0527_12_16.csv")
+}
+
+```
+
+
+### 2-2-2. 응급의료기관 목록정보 조회
+```{r echo=FALSE, result='hide', message=FALSE}
+## 응급의료기관 조회서비스 3번 오퍼레이터 - 좌표값 찾기
+
+api_call_func2 <- function() {
+  pageNo = "1"
+  numOfRows = "99" # "&pageNo=", pageNo, "&numOfRows=", numOfRows
+  operator = "getEgytListInfoInqire"
+  
+  result_table_3 = tibble()
+  
+  for (i in 1:402){
+    QN = result_table_1[i,1]
+    queryParams = str_c("?serviceKey=", Servicekey, "&QN=", QN)
+    doc = xmlInternalTreeParse(str_c(url, operator, queryParams))
+    rootNode = xmlRoot(doc)
+    tmp_tbl_2 = xmlToDataFrame(nodes = getNodeSet(rootNode, '//items//hpid')) %>% as_tibble(.name_repair = "unique")
+    tmp_tbl_3 = xmlToDataFrame(nodes = getNodeSet(rootNode, '//items//dutyName')) %>% as_tibble(.name_repair = "unique")
+    tmp_tbl_4 = xmlToDataFrame(nodes = getNodeSet(rootNode, '//items//wgs84Lon')) %>% as_tibble(.name_repair = "unique")
+    tmp_tbl_5 = xmlToDataFrame(nodes = getNodeSet(rootNode, '//items//wgs84Lat')) %>% as_tibble(.name_repair = "unique")
+    tmp_tbl_2 = tmp_tbl_2 %>% bind_cols(.,tmp_tbl_3) %>% bind_cols(.,tmp_tbl_4) %>% bind_cols(.,tmp_tbl_5)
+    result_table_3 = result_table_3 %>% bind_rows(.,tmp_tbl_2)}
+  
+  write_xlsx(result_table_3, "응급의료기관 목록정보 조회 서비스_3.xlsx")
+}
+
+```
+
+### 2-2-3. 중증질환자 수용가능 정보 오퍼레이터
+```{r echo=FALSE, result='hide', message=FALSE}
+# (2) 중증질환자 수용가능 정보 오퍼레이터
+api_call_func3 <- function() {
+  operator = "getSrsillDissAceptncPosblInfoInqire"
+  result_table_2 = tibble()
+  
+  for (i in 1:40){
+    queryParams = str_c("?serviceKey=", Servicekey, "&pageNo=", as.character(i), "&numOfRows=", "14")
+    doc = xmlInternalTreeParse(str_c(url, operator, queryParams))
+    rootNode = xmlRoot(doc)
+    names = rootNode[[2]][['items']][['item']] %>%
+      names()
+    tmp_tbl_2 = xmlToDataFrame(nodes = getNodeSet(rootNode, '//items')) %>%
+      as_tibble(.name_repair = "unique")
+    result_table_2 = result_table_2 %>% bind_rows(.,tmp_tbl_2)}
+  
+  result_table_2.df = tibble()
+  for (i in 1:23){
+    for (j in 1:14){
+      result_table_2.df[j+14*(i-1),1] = str_extract(result_table_2[i,j], "[가-힣]+")
+      result_table_2.df[j+14*(i-1),2] = str_extract(result_table_2[i,j], "[a-zA-Z][0-9]+")
+      result_table_2.df[j+14*(i-1),3] = substr(str_extract(result_table_2[i,j], "[a-zA-Z]{12}"), 1, 1)
+      result_table_2.df[j+14*(i-1),4] = substr(str_extract(result_table_2[i,j], "[a-zA-Z]{12}"), 2, 2)
+      result_table_2.df[j+14*(i-1),5] = substr(str_extract(result_table_2[i,j], "[a-zA-Z]{12}"), 3, 3)
+      result_table_2.df[j+14*(i-1),6] = substr(str_extract(result_table_2[i,j], "[a-zA-Z]{12}"), 4, 4)
+      result_table_2.df[j+14*(i-1),7] = substr(str_extract(result_table_2[i,j], "[a-zA-Z]{12}"), 5, 5)
+      result_table_2.df[j+14*(i-1),8] = substr(str_extract(result_table_2[i,j], "[a-zA-Z]{12}"), 6, 6)
+      result_table_2.df[j+14*(i-1),9] = substr(str_extract(result_table_2[i,j], "[a-zA-Z]{12}"), 7, 7)
+      result_table_2.df[j+14*(i-1),10] = substr(str_extract(result_table_2[i,j], "[a-zA-Z]{12}"), 8, 8)
+      result_table_2.df[j+14*(i-1),11] = substr(str_extract(result_table_2[i,j], "[a-zA-Z]{12}"), 9, 9)
+      result_table_2.df[j+14*(i-1),12] = substr(str_extract(result_table_2[i,j], "[a-zA-Z]{12}"), 10, 10)
+      result_table_2.df[j+14*(i-1),13] = substr(str_extract(result_table_2[i,j], "[a-zA-Z]{12}"), 11, 11)
+      result_table_2.df[j+14*(i-1),14] = substr(str_extract(result_table_2[i,j], "[a-zA-Z]{12}"), 12, 12)}}
+  result_table_2.df = result_table_2.df[1:313,]
+  
+  write_xlsx(result_table_2.df, "중증질환자 수용가능 정보_2.xlsx")
+
+}
+```
+
+### 2-2-4. 응급의료기관 기본정보 조회 오퍼레이션
+```{r echo=FALSE, result='hide', message=FALSE}
+## (5) 응급의료기관 기본정보 조회 오퍼레이션
+api_call_func4 <- function() {
+
+  operator = "getEgytBassInfoInqire"
+  result_table_5 = tibble()
+  
+  for (i in 1:2000){
+    tic()
+    queryParams = str_c("?serviceKey=", Servicekey, "&pageNo=", as.character(i), "&numOfRows=", "50")
+    doc = xmlInternalTreeParse(str_c(url, operator, queryParams))
+    rootNode = xmlRoot(doc)
+    tmp_tbl_2 = xmlToDataFrame(getNodeSet(rootNode, "//item")) %>% as_tibble()
+    result_table_5 = result_table_5 %>% bind_rows(.,tmp_tbl_2)
+    toc()}
+  write_xlsx(result_table_5, "응급의료기관 기본정보 조회_5_1.xlsx")
+  
+  table(duplicated(result_table_5$dutyName))
+}
+```
+
+### 2-2-5. 외상센터 기본정보 조회 오퍼레이션
+```{r echo=FALSE, result='hide', message=FALSE}
+## (8) 외상센터 기본정보 조회 오퍼레이션
+
+api_call_func5 <- function() {
+  operator = "getStrmBassInfoInqire"
+  result_table_8 = tibble()
+  for (i in 1:10){
+    queryParams = str_c("?serviceKey=", Servicekey, "&pageNo=", as.character(i), "&numOfRows=", "50")
+    doc = xmlInternalTreeParse(str_c(url, operator, queryParams))
+    rootNode = xmlRoot(doc)
+    tmp_tbl_3 = xmlToDataFrame(nodes = getNodeSet(rootNode, '//item')) %>% as_tibble()
+    result_table_8 = result_table_8 %>% bind_rows(.,tmp_tbl_3)}
+  
+  write_xlsx(result_table_8, "외상센터 기본정보 조회_8.xlsx")
+}
+```
+
+
+# 3. 병원 점수 + 접근성을 통한 의료취약지 점수 도출
+사용되는 데이터 리스트
+
+## 3-1. EDA
+### 3-1-1. reading csv file
+이미 csv데이터가 존재한다고 가정.
+```{r read-data, include=FALSE}
+table_1 <- read_csv('응급의료기관 기본정보 조회 서비스_1.csv')
+table_2 <- read_csv('중증질환자 수용가능 정보_2.csv')
+```
+
+### 3-1-2. merging plots
+```{r}
+hpdata <- inner_join(table_1, table_2, by='hpid')
+```
+
+### 3-1-3. selecting variables
+```{r}
+hpdata <- hpdata %>%
+  select(dutyName.x, starts_with('h'), starts_with('mk'))%>%
+  select(-hv1, -hv12, -hvidate, -hvcc, -hvncc, -hvccc, -hvicc, -mkioskty25, -mkioskty9)
+#glimpse(hpdata)
+#str(hpdata)
+```
+
+### 3-1-4. of unique values in each variable
+```{r}
+nuniq <- c()
+for(i in 1:length(colnames(hpdata))) {
+  nuniq[i] <- hpdata[,i] %>%
+  n_distinct()
+}
+nuniq
+```
+
+### 3-1-5. remove columns with zero variance
+```{r}
+hpdata <- hpdata[,nuniq!=1]
+```
+```{r}
+#str(hpdata)
+nuniq <- c()
+for(i in 1:length(colnames(hpdata))) {
+  nuniq[i] <- hpdata[,i] %>%
+  n_distinct()
+}
+nuniq
+```
+
+### 3-1-6. devide table
+```{r}
+hpdata_f <- hpdata[,nuniq<=3]
+hpdata_n <- hpdata[,nuniq>3]
+```
+
+
+### 3-1-7. recoding
+```{r}
+hpdata_f <- hpdata_f %>%
+  mutate_all(funs(recode(., 'N1'=0L, '0'=0L, 'N'=0L, '1'=1L, 'Y'=1L, .default=1L)))
+#str(hpdata_f)
+```
+
+### 3-1-8. merge again
+```{r}
+hpdata <- bind_cols(hpdata_n, hpdata_f)
+glimpse(hpdata)
+```
+
+### 3-1-9. centering and scaling
+```{r}
+hpdata_z <- hpdata %>%
+  mutate_each_(funs(scale), vars=colnames(hpdata)[3:length(colnames(hpdata))])
+#head(hpdata_z[,3:32])
+```
+
+
+## 3-2. PCA
+병원 점수 축을 생성하기 위한 PCA.
+어떤 결과가 출력?
+### 3-2-1. Principal Component Analysis
+```{r}
+hp_without_id <- hpdata_z[,3:length(colnames(hpdata_z))] %>%
+    as.matrix()
+hp_pca <- prcomp(hp_without_id)
+hp_pca[[1]]
+hp_pca[[2]][,1:3]
+```
+
+
+### 3-2-2. variance explained: \(R^2\)
+First conponent explains 25% of the total variance.
+```{r}
+summary(hp_pca)
+```
+
+
+### 3-2-3. scree plot
+```{r}
+screeplot(hp_pca, main = "", col = "blue", type = "lines", pch = 21)
+```
+
+
+### 3-2-4. hospital score
+```{r}
+hp_pc1 <- predict(hp_pca)[,1]
+hp_score <- (100-20*hp_pc1)
+hospital_score <- hpdata %>%
+  select(dutyName.x,hpid)%>%
+  mutate(score=hp_score)
+skim(hospital_score)
+```
+
+
+### 3-2-5. plotting hospital scores
+```{r echo=FALSE, result='hide', message=FALSE}
+library(ggplot2)
+plot_score <- ggplot(hospital_score, aes(x=score))+
+  geom_histogram(fill='sky blue', binwidth = 10)
+plot_score
+```
+
+### 3-2-6. exporting dataset
+```{r echo=FALSE, result='hide', message=FALSE}
+write.csv(hospital_score, file = 'hospital_score')
+```
+
+### To Do 
+* Exploratory Data Analysis
+* Multicolinearity
+* Variable selection
+* Interpretation of each PC(constructing scores other than current hospital score)
+  
+### second component
+```{r echo=FALSE, result='hide', message=FALSE}
+secondComponent <- hp_pca[[2]][,2]
+as.matrix(secondComponent[order(secondComponent)])
+```
+### VIF
+```{r echo=FALSE, result='hide', message=FALSE}
+cor(hpdata_z[,-c(1,2)])
+pairs(hpdata_z[,-c(1,2)])
+pairs(hpdata_z[,3:9])
+```
+
+### merging data with hospital_score
+```{r echo=FALSE, result='hide', message=FALSE}
+table_1 <- read_csv('응급의료기관 기본정보 조회 서비스_1.csv')
+table_2 <- read_csv('중증질환자 수용가능 정보_2.csv')
+hpdata_transient <- inner_join(table_1, table_2, by='hpid')
+hpdata_full <- left_join(hpdata_transient, hospital_score, by='hpid')
+write.csv(hpdata_full, file = 'hospital_score_fulldata.csv')
+```
+
+
+# 4. 인구 밀도에 따른 국내 지도 시각화
