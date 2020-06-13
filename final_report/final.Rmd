@@ -1,8 +1,17 @@
 ---
-title: "RMarkDownFile"
+title: "응급의료 취약지 분석"
 author: "[Golden Time](https://github.com/twg12/IntroToDataScience_5)"
-date: '2020 6 8 '
-output: html_document
+date: "`r Sys.Date()`"
+output:
+  html_document: 
+    toc: yes
+    toc_float: true
+    highlight: tango
+    code_folding: show
+    number_section: true
+    self_contained: true
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -29,36 +38,41 @@ library(writexl)
 library(tictoc)
 ```
 
-프로젝트 소개가 들어갈 예정입니다.
 
-To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
+# 국내 응급의료 취약지 선정의 현주소
 
-# 1. 국내 응급의료 취약지 선정의 현주소
+["보건복지부는 최근 행정예고를 통해 ‘지역응급의료센터로 30분내 도달이 불가능하거나, 권역응급의료센터로 1시간 이내 도달이 불가능한 인구가 지역 내 30% 이상인 지역’을 응급의료취약지로 지정하도록 했다."](http://www.docdocdoc.co.kr/news/articleView.html?idxno=1038322)  
 
-응급의료 취약지 선정에 대한 내용이 들어갈 예정입니다.
+2017년에 지정되어 현재까지 이어져오고 있는 응급의료취약지 지정 기준은 특정 지역에서의 응급의료센터까지의 접근성을 기준으로 판단되고 있다.  
+
+하지만 이러한 지정 기준은 응급 의료 상황 시에 적합한 수술 및 치료를 다할 수 있는지에 대한 **1)응급 의료 시설 인프라 점수**와, **2)해당 응급 의료 시설을 이용하는 실제 인구 수**를 반영하지 못하는 한계점을 갖는다.
+따라서 우리는 각 지역의 응급의료시설에 대한 응급의료 시설 인프라 점수와 취약 계층을 반영한 응급 의료 취약지를 선정한다.
 
 
-# 2. 데이터 선정
+# 데이터 선정
 응급의료 취약지를 선정하기 위한 요인들을 고려했다.  
-1. 접근성
-  - 응급 상황 시 환자의 이송시간은 환자의 생존여부과 큰 상관 관계를 갖는다. 하지만 우리나라의 인허가된 의료시설을 살펴보면 병원은 3,881개로 이 가운데 3,194개가 도시지역에 집중되어 있다. 
-2. 취약 인구 지수, 인구 밀도
+
+### 접근성
+  - 응급 상황 시 환자의 이송시간은 환자의 생존여부과 큰 상관 관계를 갖는다. 하지만 우리나라의 인허가된 의료시설을 살펴보면 병원은 3,881개로 이 가운데 3,194개가 도시지역에 집중되어 있다.
+  
+### 취약 인구 지수, 인구 밀도
   - 우리나라 고령인구 비율은 전체 인구 중 13.2%이나, 농어촌지역은 37.8%로 도시지역에 비해 고령화가 빠르게 진행 중에 있다(Statistics, 2015). 고령인구 사망자 가운데 응급처치가 필요한 심장질환에 의한 사망자는 2006년 14,906명에서 2016년 24,259명으로 약 63%가 증가하였으며, 1년에 약 6%씩 증가하고 있는 것으로 조사되었다(Statistics, 2017). 향후 2060년에는 고령인구가 인구 전
 체에 40%를 육박할 것으로 추정되어(Beak et al., 2016), 심장질환에 취약한 고령인구 또한 증가할 것으로 예상되고 있다.
-3. 응급의료시설 점수
-  - 뇌졸중, 심근경색 등 중증 심혈관질환자의 경우, 인근 응급시설로 이송된 이후 해당 응급의료시설에서의 의료 자원 부족으로 적절한 조치를 받지 못하며 타 병원으로 이송되는 경우가 종종 발생한다. 접근성만을 고려했을 때, 이와 같은 요인을 고려되지 못하므로, 각 병원별 응급의료시설의 점수를 취약지 선정에 반영하기로 하였다. 
+
+### 응급의료시설 점수
+  - 뇌졸중, 심근경색 등 중증 심혈관질환자의 경우, 인근 응급시설로 이송된 후, 해당 응급의료시설에서의 의료 자원 부족으로 적절한 조치를 받지 못하는 경우가 발생한다. 접근성 뿐만 아니라 해당 응급의료시설의 인프라도 중요하다고 판단하였다.  
 
 
-## 2-1. Data source
+## Data source
 접근성과 응급의료시설 점수를 계산하기 위한 데이터 수집은 [공공데이터포털 - 전국 응급의료기관 조회 서비스](https://www.data.go.kr/data/15000563/openapi.do)를 활용했다.
 
-## 2-2. Data Extraction
+## Data Extraction
 데이터는 공공 데이터 센터에서 제공하는 API를 통해서 호출.
 데이터 로딩에 오랜 시간이 걸리기 때문에, xlsx파일로 저장하고,
 만약 해당 데이터가 존재하지 않는다면 API를 호출해서 파일로 저장한다.
 
-### 2-2-1. 응급의료기관 기본 정보 조회 서비스
-```{r echo=FALSE, result='hide', message=FALSE}
+### 응급의료기관 기본 정보 조회 서비스
+```{r result='hide', message=FALSE}
 
 
 # 응급의료기관 기본정보 조회 서비스
@@ -95,8 +109,8 @@ api_call_func1 <- function() {
 ```
 
 
-### 2-2-2. 응급의료기관 목록정보 조회
-```{r echo=FALSE, result='hide', message=FALSE}
+### 응급의료기관 목록정보 조회
+```{r result='hide', message=FALSE}
 ## 응급의료기관 조회서비스 3번 오퍼레이터 - 좌표값 찾기
 
 api_call_func2 <- function() {
@@ -123,8 +137,8 @@ api_call_func2 <- function() {
 
 ```
 
-### 2-2-3. 중증질환자 수용가능 정보 오퍼레이터
-```{r echo=FALSE, result='hide', message=FALSE}
+### 중증질환자 수용가능 정보 오퍼레이터
+```{r  result='hide', message=FALSE}
 # (2) 중증질환자 수용가능 정보 오퍼레이터
 api_call_func3 <- function() {
   operator = "getSrsillDissAceptncPosblInfoInqire"
@@ -164,8 +178,8 @@ api_call_func3 <- function() {
 }
 ```
 
-### 2-2-4. 응급의료기관 기본정보 조회 오퍼레이션
-```{r echo=FALSE, result='hide', message=FALSE}
+### 응급의료기관 기본정보 조회 오퍼레이션
+```{r result='hide', message=FALSE}
 ## (5) 응급의료기관 기본정보 조회 오퍼레이션
 api_call_func4 <- function() {
 
@@ -186,8 +200,8 @@ api_call_func4 <- function() {
 }
 ```
 
-### 2-2-5. 외상센터 기본정보 조회 오퍼레이션
-```{r echo=FALSE, result='hide', message=FALSE}
+### 외상센터 기본정보 조회 오퍼레이션
+```{r result='hide', message=FALSE}
 ## (8) 외상센터 기본정보 조회 오퍼레이션
 
 api_call_func5 <- function() {
@@ -204,24 +218,55 @@ api_call_func5 <- function() {
 }
 ```
 
+# 접근성 계산
+- 대한민국 지도에서 읍, 면, 동 단위로 각 지점에서 특정 거리 내에 있는 응급 의료 시설 거리를 합하여 계산한다. 
 
-# 3. 병원 점수 + 접근성을 통한 의료취약지 점수 도출
-사용되는 데이터 리스트
 
-## 3-1. EDA
-### 3-1-1. reading csv file
-이미 csv데이터가 존재한다고 가정.
+
+
+# 의료시설 인프라 점수 도출
+- API를 통해 추출한 데이터 영역에서 특정 변수들을 선택해 해당 응급의료시설에 대한 점수를 구성한다.  
+
+선택한 변수는 아래와 같다.
+
+1. hv2 : 내과중환자실
+1. hv3 : 외과중환자실 
+1. hv6 : 신경외과중환자실   
+1. hv9 : 외상중환자
+1. hvec : 응급실
+1. hvgc : 입원실
+1. hvoc : 수술실
+1. hv10 : VENTI(소아)
+1. hv11 : 인큐베이터(보육기)   
+1. hv5 : 신경과입원실
+1. hv7 : 약물중환자
+1. hvctayn : CT가용(가/부)
+1. hvmriayn : MRI가용(가/부)
+1. hvventiayn : 인공호흡기가용(가/부)
+1. mkioskty1 : 뇌출혈수술
+1. mkioskty2 : 뇌경색의재관류
+1. mkioskty3 : 심근경색의재관류
+1. mkioskty4 : 복부손상의수술
+1. mkioskty5 : 사지접합의수술
+1. mkioskty6 : 응급내시경
+1. mkioskty7 : 응급투석
+1. mkioskty8 : 조산산모
+1. mkioskty10 : 신생아
+1. mkioskty11 : 중증화상
+
+## EDA
+### reading csv file
 ```{r read-data, include=FALSE}
 table_1 <- read_csv('응급의료기관 기본정보 조회 서비스_1.csv')
 table_2 <- read_csv('중증질환자 수용가능 정보_2.csv')
 ```
 
-### 3-1-2. merging plots
+### merging plots
 ```{r}
 hpdata <- inner_join(table_1, table_2, by='hpid')
 ```
 
-### 3-1-3. selecting variables
+### selecting variables
 ```{r}
 hpdata <- hpdata %>%
   select(dutyName.x, starts_with('h'), starts_with('mk'))%>%
@@ -230,7 +275,7 @@ hpdata <- hpdata %>%
 #str(hpdata)
 ```
 
-### 3-1-4. of unique values in each variable
+### length of unique values in each variable
 ```{r}
 nuniq <- c()
 for(i in 1:length(colnames(hpdata))) {
@@ -240,7 +285,7 @@ for(i in 1:length(colnames(hpdata))) {
 nuniq
 ```
 
-### 3-1-5. remove columns with zero variance
+### remove columns with zero variance
 ```{r}
 hpdata <- hpdata[,nuniq!=1]
 ```
@@ -254,27 +299,27 @@ for(i in 1:length(colnames(hpdata))) {
 nuniq
 ```
 
-### 3-1-6. devide table
+### devide table
 ```{r}
 hpdata_f <- hpdata[,nuniq<=3]
 hpdata_n <- hpdata[,nuniq>3]
 ```
 
 
-### 3-1-7. recoding
+### recoding
 ```{r}
 hpdata_f <- hpdata_f %>%
   mutate_all(funs(recode(., 'N1'=0L, '0'=0L, 'N'=0L, '1'=1L, 'Y'=1L, .default=1L)))
 #str(hpdata_f)
 ```
 
-### 3-1-8. merge again
+### merge again
 ```{r}
 hpdata <- bind_cols(hpdata_n, hpdata_f)
 glimpse(hpdata)
 ```
 
-### 3-1-9. centering and scaling
+### centering and scaling
 ```{r}
 hpdata_z <- hpdata %>%
   mutate_each_(funs(scale), vars=colnames(hpdata)[3:length(colnames(hpdata))])
@@ -282,10 +327,11 @@ hpdata_z <- hpdata %>%
 ```
 
 
-## 3-2. PCA
-병원 점수 축을 생성하기 위한 PCA.
-어떤 결과가 출력?
-### 3-2-1. Principal Component Analysis
+## PCA
+병원 점수 축을 생성하기 위하여 앞서 추출한 변수들을 통해 PCA 기법을 활용했다.
+
+
+### Principal Component Analysis
 ```{r}
 hp_without_id <- hpdata_z[,3:length(colnames(hpdata_z))] %>%
     as.matrix()
@@ -295,20 +341,20 @@ hp_pca[[2]][,1:3]
 ```
 
 
-### 3-2-2. variance explained: \(R^2\)
+### variance explained: \(R^2\)
 First conponent explains 25% of the total variance.
 ```{r}
 summary(hp_pca)
 ```
 
 
-### 3-2-3. scree plot
+### screen plot
 ```{r}
 screeplot(hp_pca, main = "", col = "blue", type = "lines", pch = 21)
 ```
 
 
-### 3-2-4. hospital score
+### hospital score
 ```{r}
 hp_pc1 <- predict(hp_pca)[,1]
 hp_score <- (100-20*hp_pc1)
@@ -319,7 +365,7 @@ skim(hospital_score)
 ```
 
 
-### 3-2-5. plotting hospital scores
+### plotting hospital scores
 ```{r echo=FALSE, result='hide', message=FALSE}
 library(ggplot2)
 plot_score <- ggplot(hospital_score, aes(x=score))+
@@ -327,7 +373,7 @@ plot_score <- ggplot(hospital_score, aes(x=score))+
 plot_score
 ```
 
-### 3-2-6. exporting dataset
+### exporting dataset
 ```{r echo=FALSE, result='hide', message=FALSE}
 write.csv(hospital_score, file = 'hospital_score')
 ```
@@ -339,19 +385,20 @@ write.csv(hospital_score, file = 'hospital_score')
 * Interpretation of each PC(constructing scores other than current hospital score)
   
 ### second component
-```{r echo=FALSE, result='hide', message=FALSE}
+```{r}
 secondComponent <- hp_pca[[2]][,2]
 as.matrix(secondComponent[order(secondComponent)])
 ```
-### VIF
-```{r echo=FALSE, result='hide', message=FALSE}
-cor(hpdata_z[,-c(1,2)])
-pairs(hpdata_z[,-c(1,2)])
-pairs(hpdata_z[,3:9])
+
+### Multicolinearity, VIF
+```{r}
+#cor(hpdata_z[,-c(1,2)])
+#pairs(hpdata_z[,-c(1,2)])
+#pairs(hpdata_z[,3:9])
 ```
 
 ### merging data with hospital_score
-```{r echo=FALSE, result='hide', message=FALSE}
+```{r}
 table_1 <- read_csv('응급의료기관 기본정보 조회 서비스_1.csv')
 table_2 <- read_csv('중증질환자 수용가능 정보_2.csv')
 hpdata_transient <- inner_join(table_1, table_2, by='hpid')
@@ -359,5 +406,99 @@ hpdata_full <- left_join(hpdata_transient, hospital_score, by='hpid')
 write.csv(hpdata_full, file = 'hospital_score_fulldata.csv')
 ```
 
+## Constructing Valid Scores for hospitals in case of emergency
 
-# 4. 인구 밀도에 따른 국내 지도 시각화
+* Scores should indicate *the overall reliability* of hospitals in case of emergency, not indicating some other criteria such as the *size of the hospital*, and *expertise of doctors*, etc..
+* Therefore, it is of primary interest whether there are emergency rooms available for immediately accomodating emergency patients. And thus, some ways to giving weight to the availability of emergency rooms has to be considered.
+* The first way is to merge the raw data of the availability with overall hospital score, and the second is to merge binary data of the availability with overall hospital score.
+
+### overall hospital score without emergency room
+```{r}
+hpdata_z_without_er <- hpdata_z %>%
+  select(-dutyName.x, -hpid, -hvec) %>%
+    as.matrix()
+hp_pca_overall <- prcomp(hpdata_z_without_er)
+hp_pca_overall[[1]]
+hp_pca_overall[[2]][,1:3]
+hp_pc1_overall <- predict(hp_pca_overall)[,1]
+hp_score_overall <- (100-20*scale(hp_pc1_overall))
+```
+
+### Constructing Score using raw data
+```{r}
+hpdata_raw <- hpdata_z %>%
+  select(dutyName.x, hpid, hvec) %>%
+  mutate(score= scale(hp_score_overall))
+hp_pca_raw <- prcomp(hpdata_raw[,3:4])
+hp_pca_raw[[1]]
+hp_pca_raw[[2]]
+summary(hp_pca_raw)
+hp_pc1_raw <- predict(hp_pca_raw)[,1]
+hp_score_raw <- (100-20*scale(hp_pc1_raw))
+```
+
+### Constructing Score using binary data
+```{r}
+hpdata_binary <- hpdata_raw %>%
+  mutate(hvec = ifelse(
+    hvec >= 1, 1, 0
+  ))
+unique(hpdata_binary$hvec)
+hp_pca_binary <- prcomp(hpdata_binary[,3:4])
+hp_pca_binary[[1]]
+hp_pca_binary[[2]]
+summary(hp_pca_binary)
+hp_pc1_binary <- predict(hp_pca_binary)[,1]
+hp_score_binary <- (100-20*scale(hp_pc1_binary))
+```
+
+### Importing criterion for checking criterion validity
+```{r}
+criterion <- read_csv('hospital_score_fulldata_criterion.csv') %>%
+  select(hpid, criterion)
+hospital_score_raw_bin <- hpdata %>%
+  select(dutyName.x,hpid)%>%
+  mutate(score_overall=hp_score_overall,
+         score_raw=hp_score_raw,
+         score_binary=hp_score_binary) %>%
+  full_join(., criterion, by= 'hpid')
+unique(hospital_score_raw_bin$criterion)
+hospital_score_raw_bin <- hospital_score_raw_bin %>%
+  mutate(criterion=recode(criterion, '1'=1L, '2'=2L, '3'=3L, .default=NA_integer_))
+str(hospital_score_raw_bin)
+```
+
+### Checking criterion validity
+```{r}
+cor(hospital_score_raw_bin[,3:6], use= 'pairwise.complete.obs')
+hospital_score_raw_bin %>% 
+  drop_na(criterion)%>%
+  ggplot(aes(as.factor(criterion),score_overall))+
+  geom_point(position = 'jitter')+
+  labs(x='Criterion')
+hospital_score_raw_bin %>% 
+  drop_na(criterion)%>%
+  ggplot(aes(as.factor(criterion),score_raw))+
+  geom_point(position = 'jitter')+
+  labs(x='Criterion')
+hospital_score_raw_bin %>% 
+  drop_na(criterion)%>%
+  ggplot(aes(as.factor(criterion),score_binary))+
+  geom_point(position = 'jitter')+
+  labs(x='Criterion')
+```
+```{r}
+a <- inner_join(hospital_score_raw_bin, select(hpdata, hpid, hvec), by='hpid')
+cor(a$criterion, a$hvec, use='complete.obs')
+a %>% 
+  drop_na(criterion)%>%
+  ggplot(aes(as.factor(criterion),hvec))+
+  geom_point(position = 'jitter')+
+  labs(x='Criterion')
+```
+  
+### Exporting data
+```{r, include=FALSE}
+write.csv(hospital_score_raw_bin, file = 'hospital_score_raw_binary.csv')
+
+# 인구 밀도에 따른 국내 지도 시각화
