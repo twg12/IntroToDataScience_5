@@ -137,13 +137,3 @@ class Discrimination_Location:
                         )
         self.rendering_map(my_map=fol_map, filepath='C:\\Users\\park\\Desktop')
 
-
-
-
-
-
-def load_emergency(self):
-
-
-
-        return pd.DataFrame
