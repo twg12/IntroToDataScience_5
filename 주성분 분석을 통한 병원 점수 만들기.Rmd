@@ -82,6 +82,7 @@ hpdata <- bind_cols(hpdata_n, hpdata_f)
 ```{r}
 hpdata_z <- hpdata %>%
   mutate_each_(funs(scale), vars=colnames(hpdata)[3:length(colnames(hpdata))])
+write.csv(hpdata_z, file="scaled_data.csv", row.names = FALSE)
 ```
 ### 공선성 진단
 ```{r}
@@ -140,5 +141,157 @@ ggplot(hospital_score, aes(x=score))+
 
 ### 병원점수 .csv 파일로 내보내기
 ```{r}
-write.csv(hospital_score, file = 'hospital_score')
+write.csv(hospital_score, file = 'hospital_score', row.names = FALSE)
 ```
+```{r}
+hp_score[hp_score > 112.5] %>% #상위 점수의 평균
+  mean()
+hp_score[hp_score < 112.5] %>% #하위 점수의 평균
+  mean()
+```
+
+******
+
+# 3. 입력 변수에 따라 점수 만들기 
+
+### 소개
+
+* 변수 입력에 따라 병원점수를 만들어주는 함수를 만들었다.
+
+### 입력값
+
+* c("응급실", "hv2")와 같이 문자벡터를 입력해야 한다. 한글명과 영문명 모두 입력 가능하다. 
+
+### 함수 종류
+
+* LetsMakeScore_Score - dplyr 패키지의 skim 함수를 통해 점수를 요약해준다.
+
+* LetsMakeScore_Plot - histogram을 그려준다.
+
+* LetsMakeScore_CSV - .csv 파일로 점수를 내보낸다. csv파일에서는 병원 이름과 병원 ID를 함께 확인할 수 있다.
+
+### 사용할 수 있는 변수
+*한글명*        |   *영어명*
+----------------|--------------
+내과중환자실    |   hv2
+외과중환자실    |   hv3
+신경외과중환자실|   hv6
+응급실          |   hvec
+입원실          |   hvgc 
+수술실          |   hvoc 
+소아            |   hv10
+인큐베이터      |   hv11
+CT              |   hvctayn
+MRI             |   hvmriayn
+인공호흡기      |   hvventiayn 
+뇌출혈수술      |   mkioskty1
+뇌경색수술      |   mkioskty2
+심근경색수술    |   mkioskty3
+복부손상수술    |   mkioskty4
+사지접합수술    |   mkioskty5
+응급내시경      |   mkioskty6
+응급투석        |   mkioskty7
+조산산모        |   mkioskty8
+신생아          |   mkioskty10 
+중증화상        |   mkioskty11
+
+### 함수 사용 예시
+```{r Code, include=FALSE}
+
+##한글 입력 값을 영어로 바꿔주기#############
+
+ I <- function(x) {
+  Input <- c(x) %>%
+    recode("내과중환자실"="hv2", 
+"외과중환자실"="hv3", 
+"신경외과중환자실"="hv6",
+"응급실"="hvec",
+"입원실"="hvgc", 
+"수술실"="hvoc", 
+"소아"="hv10",
+"인큐베이터"="hv11", 
+"CT"="hvctayn",
+"MRI"="hvmriayn",
+"인공호흡기"="hvventiayn", 
+"뇌출혈수술"="mkioskty1",
+"뇌경색수술"="mkioskty2",
+"심근경색수술"="mkioskty3",
+"복부손상수술"="mkioskty4",
+"사지접합수술"="mkioskty5",
+"응급내시경"="mkioskty6",
+"응급투석"="mkioskty7",
+"조산산모"="mkioskty8" ,
+"신생아"="mkioskty10", 
+"중증화상"="mkioskty11")
+  return(Input)
+ }
+
+##그림 그리기############################
+
+LetsMakeScore_Plot <- function(x) {
+hpdata_z <- read.csv("scaled_data.csv")
+  sc <- hpdata_z %>%
+  select(I(x))%>%
+  prcomp()
+sc_2 <- predict(sc)[,1]
+ifelse(sum(sc[[2]][,1]) > 0, sc <- sc_2, sc <- -sc_2)  
+sc <- 100+20*scale(sc)
+sc <- ifelse(sc<0, 0, sc)
+hp_score <- hpdata_z %>%
+  select(dutyName.x, hpid) %>%
+  mutate(score= sc)
+hp_score %>%
+  ggplot(aes(x=score)) +
+  geom_histogram(fill='sky blue', binwidth = 3)
+}
+
+##skim 함수를 통한 점수분포###############
+
+LetsMakeScore_Score <- function(x) {
+hpdata_z <- read.csv("scaled_data.csv")
+  sc <- hpdata_z %>%
+  select(I(x))%>%
+  prcomp()
+sc_2 <- predict(sc)[,1]
+ifelse(sum(sc[[2]][,1]) > 0, sc <- sc_2, sc <- -sc_2)  
+sc <- 100+20*scale(sc)
+sc <- ifelse(sc<0, 0, sc)
+hp_score <- hpdata_z %>%
+  select(dutyName.x, hpid) %>%
+  mutate(score= sc)
+hp_score %>%
+  select(score)%>%
+  skim()
+}
+##.csv 파일로 내보니기#########################################
+LetsMakeScore_CSV <- function(x) {
+hpdata_z <- read.csv("scaled_data.csv")
+  sc <- hpdata_z %>%
+  select(I(x))%>%
+  prcomp()
+sc_2 <- predict(sc)[,1]
+ifelse(sum(sc[[2]][,1]) > 0, sc <- sc_2, sc <- -sc_2)  
+sc <- 100+20*scale(sc)
+sc <- ifelse(sc<0, 0, sc)
+hp_score <- hpdata_z %>%
+  select(dutyName.x, hpid) %>%
+  mutate(score= sc)
+write.csv(hp_score, file = "EmergenHP_Score_User_Custom.csv", row.names = FALSE)
+}
+```
+
+```{r}
+LetsMakeScore_Plot(c("응급실","입원실","수술실"))
+#LetsMakeScore_Plot(c("CT","MRI","응급실", "수술실"))
+```
+```{r}
+LetsMakeScore_Score(c("응급실","입원실","수술실"))
+#LetsMakeScore_Score(c("CT","MRI","응급실", "수술실"))
+```
+```{r}
+LetsMakeScore_CSV(c("응급실","입원실","수술실"))
+#LetsMakeScore_CSV(c("CT","MRI","응급실", "수술실"))
+```
+
+
+
