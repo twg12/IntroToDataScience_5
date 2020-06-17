@@ -4,6 +4,7 @@ import logging.config
 
 from util.executable import get_destination
 
+# TODO: logging
 
 def init_logger(name='__main__'):
     config_path = 'config/logging.yaml'
