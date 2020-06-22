@@ -41,4 +41,6 @@
 
 아래 링크를 통해 1) 회의록, 2) 프로젝트 전체를 확인할 수 있다.  
 
-[Project GoldenTime](https://ds2020-goldentime.netlify.app/)
+- [Project GoldenTime](https://ds2020-goldentime.netlify.app/)
+
+- [Blog GitHub Site](https://github.com/YoonHoJeong/ds_2020_goldentime_blog)
