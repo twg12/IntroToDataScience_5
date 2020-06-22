@@ -1,0 +1,12 @@
+name: app_2
+title: app_2
+username:
+account: joahn-lab
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2484619
+bundleId: 3298195
+url: https://joahn-lab.shinyapps.io/app_2/
+when: 1592744122.38653
+asMultiple: FALSE
+asStatic: FALSE
