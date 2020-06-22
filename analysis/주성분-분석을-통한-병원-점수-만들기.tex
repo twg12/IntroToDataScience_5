@@ -1,0 +1,676 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+  \setmainfont[]{NanumGothic}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={주성분 분석을 통항 병원 점수 만들기},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs}
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\title{주성분 분석을 통항 병원 점수 만들기}
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+\maketitle
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\hypertarget{uxd0d0uxc0c9uxc801-uxc790uxb8cc-uxbd84uxc11d}{%
+\section{1. 탐색적 자료
+분석}\label{uxd0d0uxc0c9uxc801-uxc790uxb8cc-uxbd84uxc11d}}
+
+\hypertarget{csvuxd30cuxc77c-uxbd88uxb7ecuxc624uxae30}{%
+\subsubsection{.csv파일
+불러오기}\label{csvuxd30cuxc77c-uxbd88uxb7ecuxc624uxae30}}
+
+\begin{itemize}
+\tightlist
+\item
+  API를 호출을 통해 이미 저장된 csv파일을 불러온다. 2개의 파일은 다음과
+  같다.
+\end{itemize}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  `응급의료기관 기본정보 조회 서비스\_1.csv'
+\item
+  `중증질환자 수용가능 정보\_2.csv'
+\end{enumerate}
+
+\hypertarget{uxd45c-uxd569uxce58uxae30}{%
+\subsubsection{표 합치기}\label{uxd45c-uxd569uxce58uxae30}}
+
+dplyr 패키지의 inner\_join함수를 통해 불러온 두개의 표를 합친다. 합칠 때
+기준이 되는 것은 병원의 ID(`hpid')이다.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hpdata <-}\StringTok{ }\KeywordTok{inner_join}\NormalTok{(table_}\DecValTok{1}\NormalTok{, table_}\DecValTok{2}\NormalTok{, }\DataTypeTok{by=}\StringTok{'hpid'}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{uxbcc0uxc218uxc120uxd0dd}{%
+\subsubsection{변수선택}\label{uxbcc0uxc218uxc120uxd0dd}}
+
+응급의료에 영향을 주는 변수를 선택했다. 선택에서 제외된 변수는 `응급실
+당직 직통연락처', `외과입원실', `신결과입원실', `약물중환자',
+`화상중환자', `외상중환자', `소아당직 직통연락처', `입력일시',
+`신경중환자', `일반중환자', `신생중환자', `흉부중환자', `정신질환자
+수용가능여부', '응급실 지킴이 유무'이다.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hpdata <-}\StringTok{ }\NormalTok{hpdata }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{select}\NormalTok{(dutyName.x, }\KeywordTok{starts_with}\NormalTok{(}\StringTok{'h'}\NormalTok{), }\KeywordTok{starts_with}\NormalTok{(}\StringTok{'mk'}\NormalTok{))}\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{select}\NormalTok{(}\OperatorTok{-}\NormalTok{hv1, }\OperatorTok{-}\NormalTok{hv4, }\OperatorTok{-}\NormalTok{hv5, }\OperatorTok{-}\NormalTok{hv7, }\OperatorTok{-}\NormalTok{hv8, }\OperatorTok{-}\NormalTok{hv9, }\OperatorTok{-}\NormalTok{hv12, }\OperatorTok{-}\NormalTok{hvidate, }\OperatorTok{-}\NormalTok{hvcc, }\OperatorTok{-}\NormalTok{hvncc, }\OperatorTok{-}\NormalTok{hvccc, }\OperatorTok{-}\NormalTok{hvicc, }\OperatorTok{-}\NormalTok{mkioskty25, }\OperatorTok{-}\NormalTok{mkioskty9)}
+\CommentTok{#glimpse(hpdata)}
+\CommentTok{#str(hpdata)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{uxbcc0uxc218-uxbcc4uxb85c-uxbcc0uxc218uxac00-uxcde8uxd558uxb294-uxac12uxc758-uxac1cuxc218}{%
+\subsubsection{변수 별로 변수가 취하는 값의
+개수}\label{uxbcc0uxc218-uxbcc4uxb85c-uxbcc0uxc218uxac00-uxcde8uxd558uxb294-uxac12uxc758-uxac1cuxc218}}
+
+변수가 취할 수 있는 값의 개수를 확인하여 변수의 특성을 확인하였다.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{nuniq <-}\StringTok{ }\KeywordTok{c}\NormalTok{()}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\KeywordTok{length}\NormalTok{(}\KeywordTok{colnames}\NormalTok{(hpdata))) \{}
+\NormalTok{  nuniq[i] <-}\StringTok{ }\NormalTok{hpdata[,i] }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{n_distinct}\NormalTok{()}
+\NormalTok{\}}
+\NormalTok{nuniq}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  [1] 312 313   3   3  13  12   9   1   1   2  35 140   3  29   2   2   2   2   2
+## [20]   2   2   2   2   2   2
+\end{verbatim}
+
+\hypertarget{uxbd84uxc0b0uxc774-0uxc778-uxbcc0uxc218uxb97c-uxc81cuxac70}{%
+\subsubsection{분산이 0인 변수를
+제거}\label{uxbd84uxc0b0uxc774-0uxc778-uxbcc0uxc218uxb97c-uxc81cuxac70}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hpdata <-}\StringTok{ }\NormalTok{hpdata[,nuniq}\OperatorTok{!=}\DecValTok{1}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#str(hpdata)}
+\NormalTok{nuniq <-}\StringTok{ }\KeywordTok{c}\NormalTok{()}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\KeywordTok{length}\NormalTok{(}\KeywordTok{colnames}\NormalTok{(hpdata))) \{}
+\NormalTok{  nuniq[i] <-}\StringTok{ }\NormalTok{hpdata[,i] }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{n_distinct}\NormalTok{()}
+\NormalTok{\}}
+\NormalTok{nuniq}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  [1] 312 313   3   3  13  12   9   2  35 140   3  29   2   2   2   2   2   2   2
+## [20]   2   2   2   2
+\end{verbatim}
+
+\hypertarget{uxacfc-1-uxb610uxb294-yesuxc640-nouxb85c-uxb098uxb258uxb294-uxac00uxbcc0uxc218uxb4e4uxc744-uxb530uxb85c-uxbd84uxb9acuxd55cuxb2e4.}{%
+\subsubsection{0과 1, 또는 Yes와 No로 나뉘는 가변수들을 따로
+분리한다.}\label{uxacfc-1-uxb610uxb294-yesuxc640-nouxb85c-uxb098uxb258uxb294-uxac00uxbcc0uxc218uxb4e4uxc744-uxb530uxb85c-uxbd84uxb9acuxd55cuxb2e4.}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hpdata_f <-}\StringTok{ }\NormalTok{hpdata[,nuniq}\OperatorTok{<=}\DecValTok{3}\NormalTok{]}
+\NormalTok{hpdata_n <-}\StringTok{ }\NormalTok{hpdata[,nuniq}\OperatorTok{>}\DecValTok{3}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{uxac00uxbcc0uxc218uxb4e4uxc774-0uxacfc-1uxb85c-uxd1b5uxc77cuxb418uxb3c4uxb85d-uxd558uxace0-uxbd84uxb9acuxd588uxb358-uxbcc0uxc218uxb4e4uxc744-uxb2e4uxc2dc-uxd569uxce5cuxb2e4.}{%
+\subsubsection{가변수들이 0과 1로 통일되도록 하고 분리했던 변수들을 다시
+합친다.}\label{uxac00uxbcc0uxc218uxb4e4uxc774-0uxacfc-1uxb85c-uxd1b5uxc77cuxb418uxb3c4uxb85d-uxd558uxace0-uxbd84uxb9acuxd588uxb358-uxbcc0uxc218uxb4e4uxc744-uxb2e4uxc2dc-uxd569uxce5cuxb2e4.}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hpdata_f <-}\StringTok{ }\NormalTok{hpdata_f }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{mutate_all}\NormalTok{(}\KeywordTok{funs}\NormalTok{(}\KeywordTok{recode}\NormalTok{(., }\StringTok{'N1'}\NormalTok{=0L, }\StringTok{'0'}\NormalTok{=0L, }\StringTok{'N'}\NormalTok{=0L, }\StringTok{'1'}\NormalTok{=1L, }\StringTok{'Y'}\NormalTok{=1L, }\DataTypeTok{.default=}\NormalTok{1L)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: `funs()` is deprecated as of dplyr 0.8.0.
+## Please use a list of either functions or lambdas: 
+## 
+##   # Simple named list: 
+##   list(mean = mean, median = median)
+## 
+##   # Auto named with `tibble::lst()`: 
+##   tibble::lst(mean, median)
+## 
+##   # Using lambdas
+##   list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_warnings()` to see where this warning was generated.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#str(hpdata_f)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hpdata <-}\StringTok{ }\KeywordTok{bind_cols}\NormalTok{(hpdata_n, hpdata_f)}
+\CommentTok{#glimpse(hpdata)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{uxac01uxbcc0uxc218uxb97c-uxd3c9uxade00-uxbd84uxc0b01uxb85c-uxc815uxaddcuxd654-uxd55cuxb2e4.}{%
+\subsubsection{각변수를 평균=0, 분산=1로 정규화
+한다.}\label{uxac01uxbcc0uxc218uxb97c-uxd3c9uxade00-uxbd84uxc0b01uxb85c-uxc815uxaddcuxd654-uxd55cuxb2e4.}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hpdata_z <-}\StringTok{ }\NormalTok{hpdata }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{mutate_each_}\NormalTok{(}\KeywordTok{funs}\NormalTok{(scale), }\DataTypeTok{vars=}\KeywordTok{colnames}\NormalTok{(hpdata)[}\DecValTok{3}\OperatorTok{:}\KeywordTok{length}\NormalTok{(}\KeywordTok{colnames}\NormalTok{(hpdata))])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: `mutate_each_()` is deprecated as of dplyr 0.7.0.
+## Please use `across()` instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_warnings()` to see where this warning was generated.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{write.csv}\NormalTok{(hpdata_z, }\DataTypeTok{file=}\StringTok{"scaled_data.csv"}\NormalTok{, }\DataTypeTok{row.names =} \OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{uxacf5uxc120uxc131-uxc9c4uxb2e8}{%
+\subsubsection{공선성 진단}\label{uxacf5uxc120uxc131-uxc9c4uxb2e8}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{multi <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(hpdata_z)}\OperatorTok{~}\NormalTok{hv2}\OperatorTok{+}\NormalTok{hv3}\OperatorTok{+}\NormalTok{hv6}\OperatorTok{+}\NormalTok{hvec}\OperatorTok{+}\NormalTok{hvgc}\OperatorTok{+}\NormalTok{hvoc}\OperatorTok{+}\NormalTok{hv10}\OperatorTok{+}\NormalTok{hv11}\OperatorTok{+}\NormalTok{hvctayn}\OperatorTok{+}\NormalTok{hvmriayn}\OperatorTok{+}\NormalTok{hvventiayn}\OperatorTok{+}\NormalTok{mkioskty1}\OperatorTok{+}\NormalTok{mkioskty2}\OperatorTok{+}\NormalTok{mkioskty3}\OperatorTok{+}\NormalTok{mkioskty4}\OperatorTok{+}\StringTok{ }\NormalTok{mkioskty5}\OperatorTok{+}\NormalTok{mkioskty6}\OperatorTok{+}\NormalTok{mkioskty7}\OperatorTok{+}\NormalTok{mkioskty8}\OperatorTok{+}\NormalTok{mkioskty10}\OperatorTok{+}\NormalTok{mkioskty11, }\DataTypeTok{data =}\NormalTok{ hpdata_z, }\DataTypeTok{na.action =}\NormalTok{ na.omit)}
+\CommentTok{#alias(multi)}
+\NormalTok{car}\OperatorTok{::}\KeywordTok{vif}\NormalTok{(multi)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Registered S3 methods overwritten by 'car':
+##   method                          from
+##   influence.merMod                lme4
+##   cooks.distance.influence.merMod lme4
+##   dfbeta.influence.merMod         lme4
+##   dfbetas.influence.merMod        lme4
+\end{verbatim}
+
+\begin{verbatim}
+##        hv2        hv3        hv6       hvec       hvgc       hvoc       hv10 
+##   1.648138   1.804007   1.310922   1.172805   1.423420   1.990656   3.922743 
+##       hv11    hvctayn   hvmriayn hvventiayn  mkioskty1  mkioskty2  mkioskty3 
+##   3.705282   1.064415   1.241541   1.040046   5.162917   1.146055   1.888297 
+##  mkioskty4  mkioskty5  mkioskty6  mkioskty7  mkioskty8 mkioskty10 mkioskty11 
+##   1.065774   1.921428   1.510778   1.204425   1.497130   4.948495   1.806278
+\end{verbatim}
+
+공선성이 진단되지 않았기 때문에 주성분분석을 통해 구성된 점수를 해석하는
+것이 가능하다.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\hypertarget{uxc8fcuxc131uxbd84-uxbd84uxc11d}{%
+\section{2. 주성분 분석}\label{uxc8fcuxc131uxbd84-uxbd84uxc11d}}
+
+\hypertarget{uxc8fcuxc131uxbd84-uxbd84uxc11d-1}{%
+\subsubsection{주성분 분석}\label{uxc8fcuxc131uxbd84-uxbd84uxc11d-1}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hp_without_id <-}\StringTok{ }\NormalTok{hpdata_z[,}\DecValTok{3}\OperatorTok{:}\KeywordTok{length}\NormalTok{(}\KeywordTok{colnames}\NormalTok{(hpdata_z))] }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{as.matrix}\NormalTok{()}
+\NormalTok{hp_pca <-}\StringTok{ }\KeywordTok{prcomp}\NormalTok{(hp_without_id)}
+\NormalTok{hp_pca[[}\DecValTok{1}\NormalTok{]] }\CommentTok{# 각 축들의 표준편차}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  [1] 2.4640138 1.4604035 1.1503789 1.1001873 1.0338242 1.0028248 0.9710373
+##  [8] 0.9232028 0.9178061 0.8724288 0.8465890 0.8015302 0.7876133 0.7293690
+## [15] 0.7199176 0.6583633 0.6379101 0.5822163 0.5341394 0.4156376 0.3489150
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hp_pca[[}\DecValTok{2}\NormalTok{]][,}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{] }\CommentTok{# 1~3번째 축에서 나타나는 변수별 가중치}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                     PC1         PC2           PC3
+## hv2        -0.211650295  0.19373284 -0.3158966648
+## hv3        -0.231976885  0.24112014 -0.2239434189
+## hv6        -0.191622689  0.14314715  0.0752503786
+## hvec       -0.001037467 -0.30158910 -0.3019287589
+## hvgc       -0.203638091  0.11176093 -0.3639099076
+## hvoc       -0.303645758  0.07992349  0.0192952747
+## hv10       -0.340716971  0.12351172  0.0666368229
+## hv11       -0.330806531  0.12716515  0.0163566790
+## hvctayn    -0.036935955 -0.13979331 -0.3129325605
+## hvmriayn   -0.109943424 -0.24594244 -0.4490333710
+## hvventiayn -0.014754296  0.06661759 -0.0908370136
+## mkioskty1  -0.347272730  0.06151047  0.1924964960
+## mkioskty2  -0.009038952 -0.27383190  0.2288905515
+## mkioskty3  -0.223295924 -0.32213302  0.0025165158
+## mkioskty4  -0.036313568 -0.13149276 -0.2608733054
+## mkioskty5  -0.252634423 -0.22298420 -0.0418016274
+## mkioskty6  -0.125735546 -0.45143665  0.1436298878
+## mkioskty7  -0.136599168 -0.19146390  0.2733836558
+## mkioskty8  -0.157872266 -0.40147944 -0.0008365266
+## mkioskty10 -0.347124224  0.07244286  0.1787771317
+## mkioskty11 -0.276114493  0.04090011  0.1460502878
+\end{verbatim}
+
+첫번째 축을 보면 모든 변수들의 가중치가 같은 방향으로 부여되는 것을
+확인할 수 있다.
+\[y=\beta_1X_1+\beta_2X_2+\beta_3X_3+ ... \beta_{21}X_{21}\]이고, 각
+\(\beta\)들은 음의 값으로 나왔기 때문에, -y에 적절한 상수를 곱하고
+더하여 병원 점수를 구성할 수 있다.
+
+\hypertarget{uxc124uxba85uxb41c-uxbd84uxc0b0uxc758-uxc591-r2}{%
+\subsubsection{\texorpdfstring{설명된 분산의 양:
+\(R^2\)}{설명된 분산의 양: R\^{}2}}\label{uxc124uxba85uxb41c-uxbd84uxc0b0uxc758-uxc591-r2}}
+
+첫번째 축은 전체 분산의 28.9\%를 설명한다. 그 다음 축들이 설명하는
+분산의 양은 10.2\%, 6.3\%, \ldots{} 로 첫번째 축에 비해 급격하게
+줄어드는 모습을 볼 수 있다.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(hp_pca)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Importance of components:
+##                           PC1    PC2     PC3     PC4     PC5     PC6    PC7
+## Standard deviation     2.4640 1.4604 1.15038 1.10019 1.03382 1.00282 0.9710
+## Proportion of Variance 0.2891 0.1016 0.06302 0.05764 0.05089 0.04789 0.0449
+## Cumulative Proportion  0.2891 0.3907 0.45369 0.51133 0.56222 0.61011 0.6550
+##                            PC8     PC9    PC10    PC11    PC12    PC13    PC14
+## Standard deviation     0.92320 0.91781 0.87243 0.84659 0.80153 0.78761 0.72937
+## Proportion of Variance 0.04059 0.04011 0.03624 0.03413 0.03059 0.02954 0.02533
+## Cumulative Proportion  0.69560 0.73571 0.77196 0.80609 0.83668 0.86622 0.89155
+##                           PC15    PC16    PC17    PC18    PC19    PC20   PC21
+## Standard deviation     0.71992 0.65836 0.63791 0.58222 0.53414 0.41564 0.3489
+## Proportion of Variance 0.02468 0.02064 0.01938 0.01614 0.01359 0.00823 0.0058
+## Cumulative Proportion  0.91623 0.93687 0.95625 0.97239 0.98598 0.99420 1.0000
+\end{verbatim}
+
+설명된 분산의 양을 scree plot을 통해 나타내면 다음과 같다.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{screeplot}\NormalTok{(hp_pca, }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{, }\DataTypeTok{type =} \StringTok{"lines"}\NormalTok{, }\DataTypeTok{pch =} \DecValTok{21}\NormalTok{, }\DataTypeTok{main=}\StringTok{"Scree Plot"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{주성분-분석을-통한-병원-점수-만들기_files/figure-latex/unnamed-chunk-14-1.pdf}
+
+\hypertarget{uxccabuxbc88uxc9f8-uxcd95uxc744-uxd65cuxc6a9uxd558uxc5ec-uxbcd1uxc6d0-uxc810uxc218-uxad6cuxc131uxd558uxae30}{%
+\subsubsection{첫번째 축을 활용하여 병원 점수
+구성하기}\label{uxccabuxbc88uxc9f8-uxcd95uxc744-uxd65cuxc6a9uxd558uxc5ec-uxbcd1uxc6d0-uxc810uxc218-uxad6cuxc131uxd558uxae30}}
+
+\hypertarget{uxc810uxc218uxc758-uxd3c9uxade0uxc740-100-uxd45cuxc900uxd3b8uxcc28uxb294-20uxc774uxb2e4.}{%
+\subparagraph{점수의 평균은 100, 표준편차는
+20이다.}\label{uxc810uxc218uxc758-uxd3c9uxade0uxc740-100-uxd45cuxc900uxd3b8uxcc28uxb294-20uxc774uxb2e4.}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hp_pc1 <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(hp_pca)[,}\DecValTok{1}\NormalTok{] }\CommentTok{# 첫번째 축에 각 데이터를 정사영하여 병원점수를 구성한다.}
+\NormalTok{hp_score <-}\StringTok{ }\NormalTok{(}\DecValTok{100-20}\OperatorTok{*}\KeywordTok{scale}\NormalTok{(hp_pc1))}
+\NormalTok{hospital_score <-}\StringTok{ }\NormalTok{hpdata }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{select}\NormalTok{(dutyName.x,hpid)}\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{score=}\NormalTok{hp_score)     }\CommentTok{# 병원이름, 병원ID, 병원점수를 선택하여 'hospital_score'라는 표를 만든다. }
+\KeywordTok{skim}\NormalTok{(hospital_score)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}ll@{}}
+\caption{Data summary}\tabularnewline
+\toprule
+\endhead
+Name & hospital\_score\tabularnewline
+Number of rows & 313\tabularnewline
+Number of columns & 3\tabularnewline
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ &\tabularnewline
+Column type frequency: &\tabularnewline
+character & 2\tabularnewline
+numeric & 1\tabularnewline
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ &\tabularnewline
+Group variables & None\tabularnewline
+\bottomrule
+\end{longtable}
+
+\textbf{Variable type: character}
+
+\begin{longtable}[]{@{}lrrrrrrr@{}}
+\toprule
+skim\_variable & n\_missing & complete\_rate & min & max & empty &
+n\_unique & whitespace\tabularnewline
+\midrule
+\endhead
+dutyName.x & 0 & 1 & 3 & 23 & 0 & 312 & 0\tabularnewline
+hpid & 0 & 1 & 8 & 8 & 0 & 313 & 0\tabularnewline
+\bottomrule
+\end{longtable}
+
+\textbf{Variable type: numeric}
+
+\begin{longtable}[]{@{}lrrrrrrrrrl@{}}
+\toprule
+skim\_variable & n\_missing & complete\_rate & mean & sd & p0 & p25 &
+p50 & p75 & p100 & hist\tabularnewline
+\midrule
+\endhead
+score & 0 & 1 & 100 & 20 & 67.9 & 84.92 & 92.55 & 110.11 & 164.63 &
+▆▇▂▃▁\tabularnewline
+\bottomrule
+\end{longtable}
+
+\hypertarget{uxbcd1uxc6d0uxc810uxc218-uxc2dcuxac01uxd654}{%
+\subsubsection{병원점수
+시각화}\label{uxbcd1uxc6d0uxc810uxc218-uxc2dcuxac01uxd654}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(ggplot2)}
+\KeywordTok{ggplot}\NormalTok{(hospital_score, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{score))}\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_histogram}\NormalTok{(}\DataTypeTok{fill=}\StringTok{'sky blue'}\NormalTok{, }\DataTypeTok{binwidth =} \DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{주성분-분석을-통한-병원-점수-만들기_files/figure-latex/unnamed-chunk-16-1.pdf}
+
+\hypertarget{uxbcd1uxc6d0uxc810uxc218-.csv-uxd30cuxc77cuxb85c-uxb0b4uxbcf4uxb0b4uxae30}{%
+\subsubsection{병원점수 .csv 파일로
+내보내기}\label{uxbcd1uxc6d0uxc810uxc218-.csv-uxd30cuxc77cuxb85c-uxb0b4uxbcf4uxb0b4uxae30}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{write.csv}\NormalTok{(hospital_score, }\DataTypeTok{file =} \StringTok{'hospital_score'}\NormalTok{, }\DataTypeTok{row.names =} \OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hp_score[hp_score }\OperatorTok{>}\StringTok{ }\FloatTok{112.5}\NormalTok{] }\OperatorTok{%>%}\StringTok{ }\CommentTok{#상위 점수의 평균}
+\StringTok{  }\KeywordTok{mean}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 131.7687
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hp_score[hp_score }\OperatorTok{<}\StringTok{ }\FloatTok{112.5}\NormalTok{] }\OperatorTok{%>%}\StringTok{ }\CommentTok{#하위 점수의 평균}
+\StringTok{  }\KeywordTok{mean}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 89.81257
+\end{verbatim}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\hypertarget{uxc785uxb825-uxbcc0uxc218uxc5d0-uxb530uxb77c-uxc810uxc218-uxb9ccuxb4e4uxae30}{%
+\section{3. 입력 변수에 따라 점수
+만들기}\label{uxc785uxb825-uxbcc0uxc218uxc5d0-uxb530uxb77c-uxc810uxc218-uxb9ccuxb4e4uxae30}}
+
+\hypertarget{uxc18cuxac1c}{%
+\subsubsection{소개}\label{uxc18cuxac1c}}
+
+\begin{itemize}
+\tightlist
+\item
+  변수 입력에 따라 병원점수를 만들어주는 함수를 만들었다.
+\end{itemize}
+
+\hypertarget{uxc785uxb825uxac12}{%
+\subsubsection{입력값}\label{uxc785uxb825uxac12}}
+
+\begin{itemize}
+\tightlist
+\item
+  c(``응급실'', ``hv2'')와 같이 문자벡터를 입력해야 한다. 한글명과
+  영문명 모두 입력 가능하다.
+\end{itemize}
+
+\hypertarget{uxd568uxc218-uxc885uxb958}{%
+\subsubsection{함수 종류}\label{uxd568uxc218-uxc885uxb958}}
+
+\begin{itemize}
+\item
+  LetsMakeScore\_Score - dplyr 패키지의 skim 함수를 통해 점수를
+  요약해준다.
+\item
+  LetsMakeScore\_Plot - histogram을 그려준다.
+\item
+  LetsMakeScore\_CSV - .csv 파일로 점수를 내보낸다. csv파일에서는 병원
+  이름과 병원 ID를 함께 확인할 수 있다.
+\end{itemize}
+
+\hypertarget{uxc0acuxc6a9uxd560-uxc218-uxc788uxb294-uxbcc0uxc218}{%
+\subsubsection{사용할 수 있는
+변수}\label{uxc0acuxc6a9uxd560-uxc218-uxc788uxb294-uxbcc0uxc218}}
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule
+\emph{한글명} & \emph{영어명}\tabularnewline
+\midrule
+\endhead
+내과중환자실 & hv2\tabularnewline
+외과중환자실 & hv3\tabularnewline
+신경외과중환자실 & hv6\tabularnewline
+응급실 & hvec\tabularnewline
+입원실 & hvgc\tabularnewline
+수술실 & hvoc\tabularnewline
+소아 & hv10\tabularnewline
+인큐베이터 & hv11\tabularnewline
+CT & hvctayn\tabularnewline
+MRI & hvmriayn\tabularnewline
+인공호흡기 & hvventiayn\tabularnewline
+뇌출혈수술 & mkioskty1\tabularnewline
+뇌경색수술 & mkioskty2\tabularnewline
+심근경색수술 & mkioskty3\tabularnewline
+복부손상수술 & mkioskty4\tabularnewline
+사지접합수술 & mkioskty5\tabularnewline
+응급내시경 & mkioskty6\tabularnewline
+응급투석 & mkioskty7\tabularnewline
+조산산모 & mkioskty8\tabularnewline
+신생아 & mkioskty10\tabularnewline
+중증화상 & mkioskty11\tabularnewline
+\bottomrule
+\end{longtable}
+
+\hypertarget{uxd568uxc218-uxc0acuxc6a9-uxc608uxc2dc}{%
+\subsubsection{함수 사용
+예시}\label{uxd568uxc218-uxc0acuxc6a9-uxc608uxc2dc}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{LetsMakeScore_Plot}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"응급실"}\NormalTok{,}\StringTok{"입원실"}\NormalTok{,}\StringTok{"수술실"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{주성분-분석을-통한-병원-점수-만들기_files/figure-latex/unnamed-chunk-19-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#LetsMakeScore_Plot(c("CT","MRI","응급실", "수술실"))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{LetsMakeScore_Score}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"응급실"}\NormalTok{,}\StringTok{"입원실"}\NormalTok{,}\StringTok{"수술실"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}ll@{}}
+\caption{Data summary}\tabularnewline
+\toprule
+\endhead
+Name & Piped data\tabularnewline
+Number of rows & 313\tabularnewline
+Number of columns & 1\tabularnewline
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ &\tabularnewline
+Column type frequency: &\tabularnewline
+numeric & 1\tabularnewline
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ &\tabularnewline
+Group variables & None\tabularnewline
+\bottomrule
+\end{longtable}
+
+\textbf{Variable type: numeric}
+
+\begin{longtable}[]{@{}lrrrrrrrrrl@{}}
+\toprule
+skim\_variable & n\_missing & complete\_rate & mean & sd & p0 & p25 &
+p50 & p75 & p100 & hist\tabularnewline
+\midrule
+\endhead
+score & 0 & 1 & 100 & 20 & 71.21 & 86.81 & 95.09 & 108.02 & 233.5 &
+▇▃▁▁▁\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#LetsMakeScore_Score(c("CT","MRI","응급실", "수술실"))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{LetsMakeScore_CSV}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"응급실"}\NormalTok{,}\StringTok{"입원실"}\NormalTok{,}\StringTok{"수술실"}\NormalTok{))}
+\CommentTok{#LetsMakeScore_CSV(c("CT","MRI","응급실", "수술실"))}
+\end{Highlighting}
+\end{Shaded}
+
+\end{document}

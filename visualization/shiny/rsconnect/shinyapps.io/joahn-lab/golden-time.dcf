@@ -1,0 +1,13 @@
+name: golden-time
+title: golden-time
+username:
+account: joahn-lab
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2473202
+bundleId: 3298369
+url: https://joahn-lab.shinyapps.io/golden-time/
+when: 1592749079.5182
+lastSyncTime: 1592749079.5182
+asMultiple: FALSE
+asStatic: FALSE
